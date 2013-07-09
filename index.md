@@ -13,7 +13,7 @@ tagline: Engineering the Second Factor
 Austin, TX. We're a polyglot dev shop making security usable.
 
 Looking for help with something technical? Try the [Toopher
-docs](https://docs.toopher.com/).
+docs](https://dev.toopher.com/).
 
 ### Posts
 
