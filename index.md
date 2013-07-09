@@ -12,6 +12,9 @@ tagline: Engineering the Second Factor
 [Toopher](https://www.toopher.com/) is a security startup based in sunny
 Austin, TX. We're a polyglot dev shop making security usable.
 
+Looking for help with something technical? Try the [Toopher
+docs](https://docs.toopher.com/).
+
 ### Posts
 
 <ul class="posts">
