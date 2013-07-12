@@ -6,9 +6,9 @@ author: seth
 ---
 {% include JB/setup %}
 
-# Enabling Travis CI for our Toopher GitHub Repos
+# Enabling Travis CI for Fun and Profit
 
-Travis CI is an amazing service for the open source community. Continuous Integration, CI, runs your tests on every commit, notifying
+Travis CI is an amazing service for the open source community! CI, Continuous Integration, runs your tests on every commit, notifying
 the team of any errors. This is a great practice that helps elevate the
 health of your software, which (hopefully) leads to more green builds.
 Travis does that for open source projects on GitHub, and it's rad.
@@ -19,6 +19,9 @@ Last week we hooked up Travis CI for a few of our repos, namely
   - [Toopher Python](https://github.com/toopher/toopher-python)
   - [Toopher PHP](https://github.com/toopher/toopher-php)
 
+Should you use Travis CI? Probably, but I'll let you decide ;-) Below are
+some pros and cons.
+
 ## Pros
   - Free
   - Fast
@@ -27,14 +30,14 @@ Last week we hooked up Travis CI for a few of our repos, namely
   - Hosted, so you don't have to maintain an additional machine
 
 ## Cons
-  - Only supports GitHub (no Bitbucket integration)
+  - Only supports GitHub (no Bitbucket integration, no Hg, etc)
   - Limited control
-  - Lack of extensensibility
+  - Limited extensensibility
 
-## CI Systems
+## CI Systems We Evaluated
 
 If you're like me, you learned about CI through the lens of Hudson (now
-Jenkins). Jenkins is still the most popular CI system, but that is changing quickly. Here's my overview of continuous integration servers:
+Jenkins). Jenkins is still the most popular CI system, but that is changing quickly. Here's an overview of continuous integration servers:
 
   - [Jenkins](http://jenkins-ci.org/) (formerly Hudson) - Powerful, heavily configurable
     enterprise class CI. There are a number of plugins to further
@@ -45,9 +48,9 @@ say it's overkill for us. Hosted instances
   - [Bamboo](http://www.atlassian.com/software/bamboo/overview) by Atlassian - Well liked by a couple people I know at Atlassian
 shops. We are using a couple Atlassian products, so Bamboo would integrate easily. As with other Atlassian products the OnDemand version costs about $10/month.
   - [Drone.io](https://drone.io) - This looks like Travis CI for business (instead of open
-source). They support Bitbucket and GitHub. At $25/mo, I think Bamboo is
-cheaper and more widely used.
-  - [Travis CI](https://travis-ci.org/) - Travis CI Pro should be out anytime now. Rumor has it, Travis will support private repos soon,
+source). They support Bitbucket and GitHub. At $25/mo, Bamboo is
+cheaper and it's more widely used.
+  - [Travis CI](https://travis-ci.org/) - Travis CI Pro should be out anytime now. Rumor has it, Travis will support private repos then,
 although it's only for GitHub (for now). Free for public GitHub repos.
 
 ## Your turn
