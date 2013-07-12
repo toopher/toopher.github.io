@@ -28,8 +28,9 @@ you're liable to find us on the Green.
 ![Toopher on the Green](https://fbcdn-sphotos-h-a.akamaihd.net/hphotos-ak-prn1/1015079_451704784926262_383600001_o.jpg)
 
 ## Find us online
-  - [GitHub](https://www.github.com/toopher/)
-  - [Twitter](https://twitter.com/toopher)
-  - [Facebook](https://www.facebook.com/toopherinc)
-  - [YouTube](http://www.youtube.com/results?search_query=toopher)
+
+ - [GitHub](https://www.github.com/toopher/)
+ - [Twitter](https://twitter.com/toopher)
+ - [Facebook](https://www.facebook.com/toopherinc)
+ - [YouTube](http://www.youtube.com/results?search_query=toopher)
 
