@@ -2,7 +2,7 @@
 layout: post
 category: toopher
 tags: [toopher]
-author: seth
+author: Seth
 ---
 {% include JB/setup %}
 
