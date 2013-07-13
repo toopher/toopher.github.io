@@ -39,13 +39,14 @@ Jenkins). Jenkins is still the most popular CI system, but that is changing quic
 
  - [Jenkins](http://jenkins-ci.org/) (formerly Hudson) - Powerful, heavily configurable
     enterprise class CI. There are a number of plugins to further
-increase functionality. Lacks polish compared to newer CI systems. Hosted instances are around $45/month.
+increase functionality. Lacks polish compared to newer CI systems. Hosted instances are around $45/month--you're really meant to download and administer it yourself.
  - [TeamCity](http://www.jetbrains.com/teamcity/) by JetBrains (makers of IntelliJ IDEA, PyCharm, RubyMine, and
 other nice IDEs) - Seems like a solid enterprise product, which is to
-say it's overkill for us. Hosted instances
+say it's overkill for us. Hosted instances could cost $50 or more per
+month--you're really meant to download and administer it yourself.
  - [Bamboo](http://www.atlassian.com/software/bamboo/overview) by Atlassian - Well liked by a couple people I know at Atlassian
 shops. We are using a couple Atlassian products, so Bamboo would integrate easily. For better or worse, using Bamboo would further lock us into Atlassian. As with other Atlassian products the OnDemand version costs about $10/month.
- - [Drone.io](https://drone.io) - This looks like Travis CI for business (instead of open
+ - [Drone.io](https://drone.io) - This looks promising. It's like Travis CI for business (instead of open
 source). They support Bitbucket and GitHub. At $25/mo, Bamboo is
 cheaper and it's more widely used.
  - [Travis CI](https://travis-ci.org/) - Travis CI Pro should be out anytime now. Rumor has it, Travis will support private repos then,
