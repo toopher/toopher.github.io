@@ -28,11 +28,11 @@ some pros and cons.
  - Hosted, so you don't have to maintain an additional machine
 
 ## Cons
- - Only supports GitHub (no Bitbucket integration, no Hg, etc)
+ - Only supports GitHub (no Bitbucket integration, no Mercurial support, etc)
  - Limited control
  - Limited extensensibility
 
-## CI Systems We Evaluated
+## CI systems we evaluated
 
 If you're like me, you learned about CI through the lens of Hudson (now
 Jenkins). Jenkins is still the most popular CI system, but that is changing quickly. Here's an overview of continuous integration servers:
@@ -44,7 +44,7 @@ increase functionality. Lacks polish compared to newer CI systems. Hosted instan
 other nice IDEs) - Seems like a solid enterprise product, which is to
 say it's overkill for us. Hosted instances
  - [Bamboo](http://www.atlassian.com/software/bamboo/overview) by Atlassian - Well liked by a couple people I know at Atlassian
-shops. We are using a couple Atlassian products, so Bamboo would integrate easily. As with other Atlassian products the OnDemand version costs about $10/month.
+shops. We are using a couple Atlassian products, so Bamboo would integrate easily. For better or worse, using Bamboo would further lock us into Atlassian. As with other Atlassian products the OnDemand version costs about $10/month.
  - [Drone.io](https://drone.io) - This looks like Travis CI for business (instead of open
 source). They support Bitbucket and GitHub. At $25/mo, Bamboo is
 cheaper and it's more widely used.
