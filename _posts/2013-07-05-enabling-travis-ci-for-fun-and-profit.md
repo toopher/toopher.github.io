@@ -17,17 +17,33 @@ Last week we hooked up Travis CI for a few of our repos, namely
  - [Toopher Python](https://github.com/toopher/toopher-python)
  - [Toopher PHP](https://github.com/toopher/toopher-php)
 
-Should you use Travis CI? Probably, but I'll let you decide ;-) Below are
-some pros and cons.
+## Quick overview
 
-## Pros
+To enable Travis CI on your repo, you'll need sign up then create a `.travis.yml` file in
+the root of your directory. 
+
+Below is our [PHP setup](https://github.com/toopher/toopher-php/blob/master/.travis.yml). Note that we're using [Composer](http://getcomposer.org/) to manage dependencies and [PHPUnit](http://phpunit.de/manual/current/en/index.html) for unit tests (which are located in a `test` directory).
+
+    language: php
+    php:
+      - 5.5
+    before_script: composer install
+    script: phpunit test/test_toopher_api.php
+
+Pretty straightforward, eh?
+
+## Pros and Cons
+
+Should you use Travis CI? Probably, but I'll let you decide ;-) Below are some pros and cons.
+
+### Pros
  - Free
  - Fast
  - GitHub integration, including cute embeddable `build passing` indicator lights
  - Popular and trending
  - Hosted, so you don't have to maintain an additional machine
 
-## Cons
+### Cons
  - Only supports GitHub (no Bitbucket integration, no Mercurial support, etc)
  - Limited control
  - Limited extensensibility
