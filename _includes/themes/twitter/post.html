@@ -1,5 +1,7 @@
 <div class="page-header">
-  <h1>{{ page.title }} {% if page.tagline %}<small>{{page.tagline}}</small>{% endif %}</h1>
+  <h1>{% if page.display_title %} {{ page.display_title }} {% else %} {{ page.title }} {% endif %}
+    {% if page.tagline %}<small>{{page.tagline}}</small>{% endif %}
+  </h1>
   <div class="date">
     <span>By {{ page.author | Toopher }} on </span>
     <span>{{ page.date | date_to_long_string }}</span>
