@@ -11,6 +11,8 @@ the team of any errors. This is a great practice that helps elevate the
 health of your software, which (hopefully) leads to more green builds.
 Travis does that for open source projects on GitHub, and it's rad.
 
+![Travis CI](http://travisci.com/images/travis-logo.png)
+
 Last week we hooked up Travis CI for a few of our repos, namely
 
  - [Toopher Ruby](https://github.com/toopher/toopher-ruby)
