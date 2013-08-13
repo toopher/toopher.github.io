@@ -24,7 +24,7 @@ Navigate to the Toopher Dev site: https://dev.toopher.com/requesters/
 
 ![Toopher Requesters homescreen](/assets/images/ToopherRequestersBlank.png)
 
-Press the "Create a new requester" button in the top right.
+Press the "Create new requester" button in the top right.
 
 ![The new Requester page](/assets/images/ToopherCreateRequesterBlank.png)
 
