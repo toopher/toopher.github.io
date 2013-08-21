@@ -1,6 +1,8 @@
 # Toopher Dev Blog
 
-The Toopher Dev Blog.
+The [Toopher Dev Blog](https://devblog.toopher.com/).
+
+![Toopher logo](/assets/images/toopher-logo.png)
 
 ## Based on Jekyll-Bootstrap
 
