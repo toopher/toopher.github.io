@@ -8,7 +8,7 @@ author: Seth
 
 So, you've implemented Toopher and you're about to take over the world.  Not so fast! Below is a checklist of scenarios to test before you unleash the beast.
 
-## Testing Your Toopher Implementation
+## Scenarios to Test
 * Can you pair? Ensure `allow` and `deny` from the Toopher-enabled device yield proper results on the implementing service.
 
 * Does pairing time out? If the user has not accepted the pairing after some time (say 90 seconds), we recommend you fail the pairing and offer the user the chance to try again.
