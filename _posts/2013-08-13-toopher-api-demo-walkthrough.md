@@ -3,13 +3,17 @@ layout: post
 category: 
 tags: []
 author: Seth
-display_title: Toopher Demo Walkthrough
+display_title: Toopher API Demo Walkthrough
 ---
 {% include JB/setup %}
 
 The Toopher API is really easy to use! But you don't have to take my
 word for it--just install one of the [Toopher language libraries](https://github.com/toopher) from GitHub and
-check it out. The steps are shown below.
+check it out. Each one contains a demo that lets you see the basics. The steps are shown below, which should be helpful for people integrating Toopher into their services.
+
+If you're not looking to interact with Toopher programmatically, check
+out the [Toopher demo site](https://demo.toopher.com/) for a quick
+course in using Toopher.
 
 
 ## Notes
