@@ -20,14 +20,20 @@ recently changed our library so that it allows you to specify a terminal
 name "extra" that will ensure that terminals are treated as unique even
 if they happen to have the same name.  To do this you'll need to update
 the library (just grab the latest from
-[github](https://github.com/toopher)) and modify the `authenticate` call
+[GitHub](https://github.com/toopher)) and modify the `authenticate` call
 as seen below:
 
     $auth = $toopher->authenticate($pairingId, $terminalName, $actionName, array("terminal_name_extra" => $terminalExtra));
 
 A common tactic is to store a random string as a secure cookie in the
 browser and then use this cookie's value to determine a unique
-terminalExtra.
+`$terminalExtra`.
 
 Let us know if you hit any snags and we'll try to help.
+
+Note: This posts demonstrates the idea in PHP, but every language library has the same
+capability with a fourth parameter of `extras` (see the PHP function
+declaration below).
+
+    public function authenticate($pairingId, $terminalName, $actionName = '', $extras = array())
 
