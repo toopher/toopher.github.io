@@ -23,7 +23,8 @@ the library (just grab the latest from
 [GitHub](https://github.com/toopher)) and modify the `authenticate` call
 as seen below:
 
-    $auth = $toopher->authenticate($pairingId, $terminalName, $actionName, array("terminal_name_extra" => $terminalExtra));
+    $auth = $toopher->authenticate($pairingId, $terminalName, 
+                                   $actionName, array("terminal_name_extra" => $terminalExtra));
 
 A common tactic is to store a random string as a secure cookie in the
 browser and then use this cookie's value to determine a unique
