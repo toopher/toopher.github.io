@@ -25,27 +25,27 @@ library](https://github.com/toopher/toopher-ruby), which simplifies calls to the
 We will update the User model (`user.rb`) to include a `toopher_pairing_id` and a utility method to determine if Toopher is enabled for the user. Here's a highlight of the changes:
 
 ``` ruby
-    class User < ActiveRecord::Base
-      attr_accessible :name, :email, :password, :password_confirmation, :toopher_pairing_id
+class User < ActiveRecord::Base
+  attr_accessible :name, :email, :password, :password_confirmation, :toopher_pairing_id
 
-      # ... removed for brevity ...
+  # ... removed for brevity ...
 
-      def toopher_enabled?
-        !toopher_pairing_id.blank?
-      end
+  def toopher_enabled?
+    !toopher_pairing_id.blank?
+  end
 
-      # ... removed for brevity ...
-    end
+  # ... removed for brevity ...
+end
 ```
 
 The `toopher_pairing_id` can be added with a migration like this:
 
 ``` ruby
-    class AddToopherToUsers < ActiveRecord::Migration
-      def change
-        add_column :users, :toopher_pairing_id, :string
-      end
-    end
+class AddToopherToUsers < ActiveRecord::Migration
+  def change
+    add_column :users, :toopher_pairing_id, :string
+  end
+end
 ```
 
 With these changes in place, we can add in logic to pair/remove Toopher
@@ -55,44 +55,44 @@ and conditionally authenticate login requests with Toopher.
 In this example, we will add Toopher to the bottom of the user settings page. We'll start by creating a partial view template (`_toopher.html.erb`):
 
 ``` ruby
-    <h3>Toopher</h3>
+<h3>Toopher</h3>
 
-    <% if current_user and current_user.toopher_enabled? %>
-      <p>
-      Thanks for setting up Toopher.
-      </p>
-      <form action="toopher_delete_pairing" method="post" id="unpair">
-        <input class="btn btn-large btn-primary" type="submit" value="Remove Toopher">
-      </form>
-    <% else %>
-      <p>
-      Please set up Toopher
-      </p>
-      <form action="toopher_create_pairing" method="post" id="pair">
-        <input type="text" name="pairing_phrase" placeholder="Pairing phrase" />
-        <input class="btn btn-large btn-primary" type="submit" value="Pair with Toopher">
-      </form>
-    <% end %>
+<% if current_user and current_user.toopher_enabled? %>
+  <p>
+  Thanks for setting up Toopher.
+  </p>
+  <form action="toopher_delete_pairing" method="post" id="unpair">
+    <input class="btn btn-large btn-primary" type="submit" value="Remove Toopher">
+  </form>
+<% else %>
+  <p>
+  Please set up Toopher
+  </p>
+  <form action="toopher_create_pairing" method="post" id="pair">
+    <input type="text" name="pairing_phrase" placeholder="Pairing phrase" />
+    <input class="btn btn-large btn-primary" type="submit" value="Pair with Toopher">
+  </form>
+<% end %>
 ```
 
 This hooks into the user settings page (`edit.html.erb`):
 
-``` html 
-    <h1>Update your profile</h1>
+``` ruby 
+<h1>Update your profile</h1>
 
-    <div class="row">
-      <div class="span6 offset3">
-        <h3>User Settings</h3>
-        // ... removed for brevity ...
-        <h3>Gravatar</h3>
-        <%= gravatar_for @user %>
-        <a href="http://gravatar.com/emails">change</a>
-      </div>
+<div class="row">
+  <div class="span6 offset3">
+    <h3>User Settings</h3>
+    // ... removed for brevity ...
+    <h3>Gravatar</h3>
+    <%= gravatar_for @user %>
+    <a href="http://gravatar.com/emails">change</a>
+  </div>
 
-      <div class="span6 offset3">
-        <%= render 'toopher' %>
-      </div>
-    </div>
+  <div class="span6 offset3">
+    <%= render 'toopher' %>
+  </div>
+</div>
 ```
 
 Now, whenever a user navigates to their settings, they will see the option to add or remove Toopher from their account. As you see in the Toopher partial above, to add Toopher the app will `POST` to `toopher_create_pairing` with a pairing phrase; to remove Toopher the app will `POST` to `toopher_delete_pairing`. Let's look at the pairing methods.
@@ -101,54 +101,54 @@ Now, whenever a user navigates to their settings, they will see the option to ad
 We implement pairing and removing Toopher as methods on the user, so we update our routes and our controller. First, the routes (`routes.rb`):
 
 ``` ruby
-    resources :users do
-      member do
-        get :following, :followers
-      end
+resources :users do
+  member do
+    get :following, :followers
+  end
 
-      post :toopher_create_pairing
-      post :toopher_delete_pairing
-    end
+  post :toopher_create_pairing
+  post :toopher_delete_pairing
+end
 ```
 
 ... and the controller (`users_controller.rb`):
 
 ``` ruby
-    def toopher_create_pairing
-      pairing_phrase = params[:pairing_phrase]
-      toopher = ToopherAPI.new(ENV['TOOPHER_CONSUMER_KEY'], ENV['TOOPHER_CONSUMER_SECRET']) rescue nil
-      @user = User.find(params[:user_id])
-      pairing = toopher.pair(pairing_phrase, @user.email)
-      start_time = Time.now
+def toopher_create_pairing
+  pairing_phrase = params[:pairing_phrase]
+  toopher = ToopherAPI.new(ENV['TOOPHER_CONSUMER_KEY'], ENV['TOOPHER_CONSUMER_SECRET']) rescue nil
+  @user = User.find(params[:user_id])
+  pairing = toopher.pair(pairing_phrase, @user.email)
+  start_time = Time.now
 
-      while !pairing.enabled and (Time.now - start_time <= 60)
-        pairing = toopher.get_pairing_status(pairing.id)
-        sleep(1)
-      end
+  while !pairing.enabled and (Time.now - start_time <= 60)
+    pairing = toopher.get_pairing_status(pairing.id)
+    sleep(1)
+  end
 
-      if pairing.enabled
-        if @user.update_attribute(:toopher_pairing_id, pairing.id)
-          flash[:success] = "Toopher now active for this account."
-          sign_in @user
-          redirect_to @user
-        else
-          render 'edit'
-        end
-      else
-        render 'edit'
-      end
+  if pairing.enabled
+    if @user.update_attribute(:toopher_pairing_id, pairing.id)
+      flash[:success] = "Toopher now active for this account."
+      sign_in @user
+      redirect_to @user
+    else
+      render 'edit'
     end
+  else
+    render 'edit'
+  end
+end
 
-    def toopher_delete_pairing
-      @user = User.find(params[:user_id])
-      if @user.update_attribute(:toopher_pairing_id, "")
-        flash[:success] = "Toopher removed from this account."
-        sign_in @user
-        redirect_to @user
-      else
-        render 'edit'
-      end
-    end
+def toopher_delete_pairing
+  @user = User.find(params[:user_id])
+  if @user.update_attribute(:toopher_pairing_id, "")
+    flash[:success] = "Toopher removed from this account."
+    sign_in @user
+    redirect_to @user
+  else
+    render 'edit'
+  end
+end
 ```
 
 With this, we can add and remove Toopher from a user. However, we are not done yet because we are blocking the server as we wait for the user to acknowledge the pairing. We'll discuss this more after looking at the first-pass on authentication updates.
@@ -157,108 +157,83 @@ With this, we can add and remove Toopher from a user. However, we are not done y
 Your standard login might look something like this:
 
 ``` ruby
-    class SessionsController < ApplicationController
-      def new
-      end
-
-      def create
-        user = User.find_by_email(params[:session][:email].downcase)
-        if user && user.authenticate(params[:session][:password])
-          pass_login(user)
-        else
-          fail_login
-        end
-      end
-
-      def destroy
-        sign_out
-        redirect_to root_url
-      end
-
-      def pass_login(user)
-        clear_toopher_session_data
-        sign_in user
-        redirect_back_or user
-      end
-
-      def fail_login
-        clear_toopher_session_data
-        flash.now[:error] = 'Invalid email/password combination'
-        render 'new'
-      end
+class SessionsController < ApplicationController
+  # ... removed for brevity ...
+  def create
+    user = User.find_by_email(params[:session][:email].downcase)
+    if user && user.authenticate(params[:session][:password])
+      pass_login(user)
+    else
+      fail_login
     end
+  end
+  # ... removed for brevity ...
+end
 ```
 
 The basic Toopher logic hooks in after the `user.authenticate` call, like this:
 
 ``` ruby
-    class SessionsController < ApplicationController
-      def new
+class SessionsController < ApplicationController
+  def create
+    user = User.find_by_email(params[:session][:email].downcase)
+    if user && user.authenticate(params[:session][:password])
+      if user.toopher_enabled?
+        toopher_auth(user)
+      else
+        pass_login(user)
       end
-
-      def create
-        user = User.find_by_email(params[:session][:email].downcase)
-        if user && user.authenticate(params[:session][:password])
-          if user.toopher_enabled?
-            toopher_auth(user)
-          else
-            pass_login(user)
-          end
-        else
-          fail_login
-        end
-      end
-
-      def toopher_auth(user=nil)
-        toopher = ToopherAPI.new(ENV['TOOPHER_CONSUMER_KEY'], ENV['TOOPHER_CONSUMER_SECRET']) rescue nil
-
-        if not session[:toopher_auth_start] # we have a request pending
-          auth_status = toopher.authenticate(user.toopher_pairing_id, request.remote_ip)
-          session[:toopher_auth_start] = Time.now
-          session[:toopher_auth_id] = auth_status.id
-        else
-          auth_status = toopher.get_authentication_status(session[:toopher_auth_id])
-        end
-
-        while auth_status.pending and (Time.now - session[:toopher_auth_start] <= 60)
-          auth_status = toopher.get_authentication_status(session[:toopher_auth_id])
-          sleep(1)
-        end
-
-        if auth_status.granted
-          pass_login(user)
-        else
-          fail_login
-        end
-      end
-
-      def destroy
-        sign_out
-        clear_toopher_session_data
-        redirect_to root_url
-      end
-
-      def pass_login(user)
-        clear_toopher_session_data
-        sign_in user
-        redirect_back_or user
-      end
-
-      def fail_login
-        clear_toopher_session_data
-        flash.now[:error] = 'Invalid email/password combination'
-        render 'new'
-      end
-
-      def name_terminal
-        render 'new'
-      end
-
-      def clear_toopher_session_data
-        session.delete(:toopher_auth_start)
-        session.delete(:toopher_auth_id)
-      end
+    else
+      fail_login
     end
+  end
+
+  def toopher_auth(user=nil)
+    toopher = ToopherAPI.new(ENV['TOOPHER_CONSUMER_KEY'], ENV['TOOPHER_CONSUMER_SECRET']) rescue nil
+
+    if not session[:toopher_auth_start] # we have a request pending
+      auth_status = toopher.authenticate(user.toopher_pairing_id, request.remote_ip)
+      session[:toopher_auth_start] = Time.now
+      session[:toopher_auth_id] = auth_status.id
+    else
+      auth_status = toopher.get_authentication_status(session[:toopher_auth_id])
+    end
+
+    while auth_status.pending and (Time.now - session[:toopher_auth_start] <= 60)
+      auth_status = toopher.get_authentication_status(session[:toopher_auth_id])
+      sleep(1)
+    end
+
+    if auth_status.granted
+      pass_login(user)
+    else
+      fail_login
+    end
+  end
+
+  def destroy
+    sign_out
+    clear_toopher_session_data
+    redirect_to root_url
+  end
+
+  def pass_login(user)
+    clear_toopher_session_data
+    sign_in user
+    redirect_back_or user
+  end
+
+  def fail_login
+    clear_toopher_session_data
+    flash.now[:error] = 'Invalid email/password combination'
+    render 'new'
+  end
+
+  def clear_toopher_session_data
+    session.delete(:toopher_auth_start)
+    session.delete(:toopher_auth_id)
+  end
+end
 ```
 
 This implementation has a couple issues:
