@@ -11,6 +11,14 @@ Integrating Toopher is simple! Here, we will provide an overview of how to integ
 
 Note: We are building off of Michael Hartl's popular [Rails Tutorial](http://ruby.railstutorial.org/) (specifically, the [sample app](https://github.com/mhartl/sample_app)), which walks the user through creating a web app like Twitter.
 
+## Grab the Toopher API gem
+First things first. Add the [Toopher API gem](http://rubygems.org/gems/toopher_api) to your `Gemfile`:
+
+    gem 'toopher_api', '~> 1.0.5'
+
+After intalling the gem (`bundle install`), you will have access to [Toopher's Ruby language
+library](https://github.com/toopher/toopher-ruby), which simplifies calls to the API.
+
 ## Updates to the User model
 We will update the User model (`user.rb`) to include a `toopher_pairing_id` and a utility method to determine if Toopher is enabled for the user. Here's a highlight of the changes:
 
@@ -260,11 +268,11 @@ This implementation has a couple issues:
 * It blocks the server, waiting for the `auth_status` to be acknowledged by the user or timeout
 * it uses the user's reported `remote_ip`, which isn't very meaningful
 
-The latter issue we will fix by letting the user name their terminal, which will be tracked in a cookie. We find "My old PC" more meaningful than "108.162.201.68" or "Chrome on Mac OS X", but the choice is yours.
+The latter issue we will fix by letting the user name their terminal, which will be tracked in a cookie. We find "My work laptop" more meaningful than "108.162.201.68" or "Chrome on Mac OS X", but the choice is yours.
 
-The former we will fix by moving the timeout logic to client-side JavaScript where we will periodically poll the server for the request's status. Note: JavaScript polling is not the only way to solve this problem. Other languages bring their own concurrency primitives that can be leveraged; for example, similar code in Node.js would release control to the event loop and continue polling on the server.
+The former we will fix by moving the timeout logic to client-side JavaScript where we will periodically poll the server for the request's status. Note: JavaScript polling is not the only way to solve this problem. For example, you could use something like [Socket.io](http://socket.io/) to effectively keep the socket open until the server responds; you could implement an authentication pending page that automatically forwards the user on after authentication; or you could create a callback that triggers the login. 
 
-With this, you will have a basic Toopher implementation working on your Rails site. In the next post we will discuss how to tidy things up.
+With this, you will have a basic Toopher implementation working on your Rails site. In the next post we'll show how to convert the this minimum viable Toopher implementation into an easy-to-use, non-blocking user delight.
 
 Questions or comments? Let us know. We aim to please!
 
