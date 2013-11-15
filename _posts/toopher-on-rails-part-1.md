@@ -54,7 +54,7 @@ and conditionally authenticate login requests with Toopher.
 ## Adding Toopher to the UI
 In this example, we will add Toopher to the bottom of the user settings page. We'll start by creating a partial view template (`_toopher.html.erb`):
 
-``` erb
+``` rhtml
 <h3>Toopher</h3>
 
 <% if current_user and current_user.toopher_enabled? %>
@@ -77,7 +77,7 @@ In this example, we will add Toopher to the bottom of the user settings page. We
 
 This hooks into the user settings page (`edit.html.erb`):
 
-``` erb
+``` rhtml
 <%= render 'toopher' %>
 ```
 
