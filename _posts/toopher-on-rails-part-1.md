@@ -14,7 +14,9 @@ Note: We are building off of Michael Hartl's popular [Rails Tutorial](http://rub
 ## Grab the Toopher API gem
 First things first. Add the [Toopher API gem](http://rubygems.org/gems/toopher_api) to your `Gemfile`:
 
-    gem 'toopher_api', '~> 1.0.5'
+``` ruby
+gem 'toopher_api', '~> 1.0.5'
+```
 
 After intalling the gem (`bundle install`), you will have access to [Toopher's Ruby language
 library](https://github.com/toopher/toopher-ruby), which simplifies calls to the API.
@@ -22,6 +24,7 @@ library](https://github.com/toopher/toopher-ruby), which simplifies calls to the
 ## Updates to the User model
 We will update the User model (`user.rb`) to include a `toopher_pairing_id` and a utility method to determine if Toopher is enabled for the user. Here's a highlight of the changes:
 
+``` ruby
     class User < ActiveRecord::Base
       attr_accessible :name, :email, :password, :password_confirmation, :toopher_pairing_id
 
@@ -32,16 +35,18 @@ We will update the User model (`user.rb`) to include a `toopher_pairing_id` and 
       end
 
       # ... removed for brevity ...
-      
     end
+```
 
 The `toopher_pairing_id` can be added with a migration like this:
 
+``` ruby
     class AddToopherToUsers < ActiveRecord::Migration
       def change
         add_column :users, :toopher_pairing_id, :string
       end
     end
+```
 
 With these changes in place, we can add in logic to pair/remove Toopher
 and conditionally authenticate login requests with Toopher.
@@ -49,6 +54,7 @@ and conditionally authenticate login requests with Toopher.
 ## Adding Toopher to the UI
 In this example, we will add Toopher to the bottom of the user settings page. We'll start by creating a partial view template (`_toopher.html.erb`):
 
+``` ruby
     <h3>Toopher</h3>
 
     <% if current_user and current_user.toopher_enabled? %>
@@ -67,33 +73,17 @@ In this example, we will add Toopher to the bottom of the user settings page. We
         <input class="btn btn-large btn-primary" type="submit" value="Pair with Toopher">
       </form>
     <% end %>
+```
 
 This hooks into the user settings page (`edit.html.erb`):
 
-    <% provide(:title, "Edit user") %>
+``` html 
     <h1>Update your profile</h1>
 
     <div class="row">
       <div class="span6 offset3">
         <h3>User Settings</h3>
-        <%= form_for(@user) do |f| %>
-          <%= render 'shared/error_messages', object: f.object %>
-
-          <%= f.label :name %>
-          <%= f.text_field :name %>
-
-          <%= f.label :email %>
-          <%= f.text_field :email %>
-
-          <%= f.label :password %>
-          <%= f.password_field :password %>
-
-          <%= f.label :password_confirmation, "Confirm Password" %>
-          <%= f.password_field :password_confirmation %>
-
-          <%= f.submit "Save changes", class: "btn btn-large btn-primary" %>
-        <% end %>
-
+        // ... removed for brevity ...
         <h3>Gravatar</h3>
         <%= gravatar_for @user %>
         <a href="http://gravatar.com/emails">change</a>
@@ -103,13 +93,14 @@ This hooks into the user settings page (`edit.html.erb`):
         <%= render 'toopher' %>
       </div>
     </div>
+```
 
 Now, whenever a user navigates to their settings, they will see the option to add or remove Toopher from their account. As you see in the Toopher partial above, to add Toopher the app will `POST` to `toopher_create_pairing` with a pairing phrase; to remove Toopher the app will `POST` to `toopher_delete_pairing`. Let's look at the pairing methods.
 
 ## The pairing methods 
-We implement pairing and removing Toopher as methods on the user, so we update our routes and our controller. First, the routes:
+We implement pairing and removing Toopher as methods on the user, so we update our routes and our controller. First, the routes (`routes.rb`):
 
-    # routes.rb
+``` ruby
     resources :users do
       member do
         get :following, :followers
@@ -118,9 +109,11 @@ We implement pairing and removing Toopher as methods on the user, so we update o
       post :toopher_create_pairing
       post :toopher_delete_pairing
     end
+```
 
 ... and the controller (`users_controller.rb`):
 
+``` ruby
     def toopher_create_pairing
       pairing_phrase = params[:pairing_phrase]
       toopher = ToopherAPI.new(ENV['TOOPHER_CONSUMER_KEY'], ENV['TOOPHER_CONSUMER_SECRET']) rescue nil
@@ -156,12 +149,14 @@ We implement pairing and removing Toopher as methods on the user, so we update o
         render 'edit'
       end
     end
+```
 
 With this, we can add and remove Toopher from a user. However, we are not done yet because we are blocking the server as we wait for the user to acknowledge the pairing. We'll discuss this more after looking at the first-pass on authentication updates.
 
 ## Authentication changes
 Your standard login might look something like this:
 
+``` ruby
     class SessionsController < ApplicationController
       def new
       end
@@ -192,9 +187,11 @@ Your standard login might look something like this:
         render 'new'
       end
     end
+```
 
 The basic Toopher logic hooks in after the `user.authenticate` call, like this:
 
+``` ruby
     class SessionsController < ApplicationController
       def new
       end
@@ -262,6 +259,7 @@ The basic Toopher logic hooks in after the `user.authenticate` call, like this:
         session.delete(:toopher_auth_id)
       end
     end
+```
 
 This implementation has a couple issues:
 
