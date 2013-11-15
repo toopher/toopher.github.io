@@ -54,7 +54,7 @@ and conditionally authenticate login requests with Toopher.
 ## Adding Toopher to the UI
 In this example, we will add Toopher to the bottom of the user settings page. We'll start by creating a partial view template (`_toopher.html.erb`):
 
-``` ruby
+``` erb
 <h3>Toopher</h3>
 
 <% if current_user and current_user.toopher_enabled? %>
@@ -77,22 +77,8 @@ In this example, we will add Toopher to the bottom of the user settings page. We
 
 This hooks into the user settings page (`edit.html.erb`):
 
-``` ruby 
-<h1>Update your profile</h1>
-
-<div class="row">
-  <div class="span6 offset3">
-    <h3>User Settings</h3>
-    // ... removed for brevity ...
-    <h3>Gravatar</h3>
-    <%= gravatar_for @user %>
-    <a href="http://gravatar.com/emails">change</a>
-  </div>
-
-  <div class="span6 offset3">
-    <%= render 'toopher' %>
-  </div>
-</div>
+``` erb
+<%= render 'toopher' %>
 ```
 
 Now, whenever a user navigates to their settings, they will see the option to add or remove Toopher from their account. As you see in the Toopher partial above, to add Toopher the app will `POST` to `toopher_create_pairing` with a pairing phrase; to remove Toopher the app will `POST` to `toopher_delete_pairing`. Let's look at the pairing methods.
