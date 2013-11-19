@@ -9,7 +9,7 @@ display_title: Toopher on Rails - Part 1
 
 Over the weekend I added Toopher to a sample application from the [Ruby on Rails Tutorial](http://railstutorial.org/) by [Michael Hartl](http://michaelhartl.com/) (specifically, the [sample app](https://github.com/mhartl/sample_app)). The application is a basic social microposting site with a simple authentication system (under the covers it uses `has_secure_password`). I hope the lean application is easy to understand--I tried to write clean, idiomatic Ruby without too many frills or tricks.
 
-You can see the code on [GitHub](https://github.com/smholloway/sample_app_2nd_ed_with_toopher/). The main changes are in the `sessions_controller` and `users_controller`.
+You can see the code on [GitHub](https://github.com/smholloway/sample_app_2nd_ed_with_toopher/). The main changes are in the `sessions_controller` and `users_controller`. To provide a better user experience we refactored several methods to return JSON and offload processing to JavaScript. The client-side JavaScript is in `toopher.js`.
 
 The application is [running on Heroku](https://rails-sample-app-with-toopher.herokuapp.com/), but I suggest you visit the [Toopher Demo](https://demo.toopher.com/) if your goal is to see how Toopher works.
 
@@ -68,14 +68,16 @@ In this example, we will add Toopher to the bottom of the user settings page. We
   Thanks for setting up Toopher.
   </p>
   <form action="toopher_delete_pairing" method="post" id="unpair">
+    <%= token_tag(nil) %>
     <input class="btn btn-large btn-primary" type="submit" value="Remove Toopher">
   </form>
 <% else %>
   <p>
-  Please set up Toopher
+  Set up Toopher by generating a pairing phrase on your mobile device and inputting the phrase below.
   </p>
   <form action="toopher_create_pairing" method="post" id="pair">
-    <input type="text" name="pairing_phrase" placeholder="Pairing phrase" />
+    <%= token_tag(nil) %>
+    <input type="text" name="pairing_phrase" id="pairing_phrase" placeholder="Pairing phrase" />
     <input class="btn btn-large btn-primary" type="submit" value="Pair with Toopher">
   </form>
 <% end %>
@@ -148,14 +150,13 @@ end
 
 During pairing, we store details about the request in the session. The same endpoint is polled by client-side JavaScript until the user accepts the pairing or the pairing times out (no response for 60 seconds, in this case).
 
-With this, we can add and remove Toopher from a user. 
+With this, users can add and remove Toopher. 
 
 ## Authentication changes
 Your standard login might look something like this:
 
 ``` ruby
 class SessionsController < ApplicationController
-  # ... removed for brevity ...
   def create
     user = User.find_by_email(params[:session][:email].downcase)
     if user && user.authenticate(params[:session][:password])
@@ -231,6 +232,14 @@ end
 ```
 
 With this, you will have a basic Toopher implementation working on your Rails site. 
+
+## Next steps
+
+This is a basic example. In a full-fledged implementation
+you would likely spruce up the UI. We recommend providing a method to
+remove Toopher; this can be self-service or performed by an administrator who flips a bit in
+the database. Self-service options include a security question and
+answer or email reset.
 
 Questions or comments? Let us know. We aim to please!
 
