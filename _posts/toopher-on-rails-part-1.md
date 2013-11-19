@@ -7,9 +7,15 @@ display_title: Toopher on Rails - Part 1
 ---
 {% include JB/setup %}
 
-Integrating Toopher is simple! Here, we will provide an overview of how to integrate with Ruby on Rails. We will start with the basics, then incrementally improve the implementation. In later posts we will show an entire example application. 
+Over the weekend I added Toopher to a sample application from the [Ruby on Rails Tutorial](http://railstutorial.org/) by [Michael Hartl](http://michaelhartl.com/) (specifically, the [sample app](https://github.com/mhartl/sample_app)). The application is a basic social microposting site with a simple authentication system (under the covers it uses `has_secure_password`). I hope the lean application is easy to understand--I tried to write clean, idiomatic Ruby without too many frills or tricks.
 
-Note: We are building off of Michael Hartl's popular [Rails Tutorial](http://ruby.railstutorial.org/) (specifically, the [sample app](https://github.com/mhartl/sample_app)), which walks the user through creating a web app like Twitter.
+You can see the code on [GitHub](https://github.com/smholloway/sample_app_2nd_ed_with_toopher/). The main changes are in the `sessions_controller` and `users_controller`.
+
+The application is [running on Heroku](https://rails-sample-app-with-toopher.herokuapp.com/), but I suggest you visit the [Toopher Demo](https://demo.toopher.com/) if your goal is to see how Toopher works.
+
+# Highlights of the integration
+
+Let's walk through some of the changes made to integrate Toopher.
 
 ## Grab the Toopher API gem
 First things first. Add the [Toopher API gem](http://rubygems.org/gems/toopher_api) to your `Gemfile`:
@@ -26,9 +32,9 @@ We will update the User model (`user.rb`) to include a `toopher_pairing_id` and 
 
 ``` ruby
 class User < ActiveRecord::Base
-  attr_accessible :name, :email, :password, :password_confirmation, :toopher_pairing_id
-
   # ... removed for brevity ...
+
+  attr_accessible :toopher_pairing_id
 
   def toopher_enabled?
     !toopher_pairing_id.blank?
@@ -88,9 +94,7 @@ We implement pairing and removing Toopher as methods on the user, so we update o
 
 ``` ruby
 resources :users do
-  member do
-    get :following, :followers
-  end
+  # ... removed for brevity ...
 
   post :toopher_create_pairing
   post :toopher_delete_pairing
@@ -100,44 +104,51 @@ end
 ... and the controller (`users_controller.rb`):
 
 ``` ruby
-def toopher_create_pairing
-  pairing_phrase = params[:pairing_phrase]
-  toopher = ToopherAPI.new(ENV['TOOPHER_CONSUMER_KEY'], ENV['TOOPHER_CONSUMER_SECRET']) rescue nil
-  @user = User.find(params[:user_id])
-  pairing = toopher.pair(pairing_phrase, @user.email)
-  start_time = Time.now
+  def toopher_create_pairing
+    @user = User.find(params[:user_id])
+    pairing_phrase = params[:pairing_phrase]
+    toopher = ToopherAPI.new(ENV['TOOPHER_CONSUMER_KEY'], ENV['TOOPHER_CONSUMER_SECRET']) rescue nil
 
-  while !pairing.enabled and (Time.now - start_time <= 60)
-    pairing = toopher.get_pairing_status(pairing.id)
-    sleep(1)
+    if not session[:toopher_pairing_start]
+      begin
+        pairing = toopher.pair(pairing_phrase, @user.email)
+      rescue
+        return toopher_bad_pairing_phrase
+      end
+      session[:toopher_pairing_start] = Time.now
+      session[:toopher_pairing_id] = pairing.id
+    else
+      pairing = toopher.get_pairing_status(session[:toopher_pairing_id])
+    end
+
+    if Time.now - session[:toopher_pairing_start] > 60
+      return pairing_timeout
+    end
+
+    if pairing and pairing.enabled
+      if @user.update_attribute(:toopher_pairing_id, session[:toopher_pairing_id])
+        sign_in @user
+        return toopher_pairing_enabled
+      end
+    end
+
+    render :json => {:pairing_id => session[:toopher_pairing_id]}
   end
 
-  if pairing.enabled
-    if @user.update_attribute(:toopher_pairing_id, pairing.id)
-      flash[:success] = "Toopher now active for this account."
+  def toopher_delete_pairing
+    @user = User.find(params[:user_id])
+    if @user.update_attribute(:toopher_pairing_id, "")
       sign_in @user
-      redirect_to @user
+      return toopher_pairing_disabled
     else
       render 'edit'
     end
-  else
-    render 'edit'
   end
-end
-
-def toopher_delete_pairing
-  @user = User.find(params[:user_id])
-  if @user.update_attribute(:toopher_pairing_id, "")
-    flash[:success] = "Toopher removed from this account."
-    sign_in @user
-    redirect_to @user
-  else
-    render 'edit'
-  end
-end
 ```
 
-With this, we can add and remove Toopher from a user. However, we are not done yet because we are blocking the server as we wait for the user to acknowledge the pairing. We'll discuss this more after looking at the first-pass on authentication updates.
+During pairing, we store details about the request in the session. The same endpoint is polled by client-side JavaScript until the user accepts the pairing or the pairing times out (no response for 60 seconds, in this case).
+
+With this, we can add and remove Toopher from a user. 
 
 ## Authentication changes
 Your standard login might look something like this:
@@ -173,65 +184,53 @@ class SessionsController < ApplicationController
       fail_login
     end
   end
-
-  def toopher_auth(user=nil)
-    toopher = ToopherAPI.new(ENV['TOOPHER_CONSUMER_KEY'], ENV['TOOPHER_CONSUMER_SECRET']) rescue nil
-
-    if not session[:toopher_auth_start] # we have a request pending
-      auth_status = toopher.authenticate(user.toopher_pairing_id, request.remote_ip)
-      session[:toopher_auth_start] = Time.now
-      session[:toopher_auth_id] = auth_status.id
-    else
-      auth_status = toopher.get_authentication_status(session[:toopher_auth_id])
-    end
-
-    while auth_status.pending and (Time.now - session[:toopher_auth_start] <= 60)
-      auth_status = toopher.get_authentication_status(session[:toopher_auth_id])
-      sleep(1)
-    end
-
-    if auth_status.granted
-      pass_login(user)
-    else
-      fail_login
-    end
-  end
-
-  def destroy
-    sign_out
-    clear_toopher_session_data
-    redirect_to root_url
-  end
-
-  def pass_login(user)
-    clear_toopher_session_data
-    sign_in user
-    redirect_back_or user
-  end
-
-  def fail_login
-    clear_toopher_session_data
-    flash.now[:error] = 'Invalid email/password combination'
-    render 'new'
-  end
-
-  def clear_toopher_session_data
-    session.delete(:toopher_auth_start)
-    session.delete(:toopher_auth_id)
-  end
+  # ... removed for brevity ...
 end
 ```
 
-This implementation has a couple issues:
+The `toopher_auth` method will initiate a Toopher authentication request if a request is not pending, storing information about the request in the session. As with the pairing endpoint, the authentication endpoint is polled by client-side JavaScript until the user replies or the request times out (60 seconds here).
 
-* It blocks the server, waiting for the `auth_status` to be acknowledged by the user or timeout
-* it uses the user's reported `remote_ip`, which isn't very meaningful
+Currently, the Toopher mobile app shows the user four pieces of information: 1) the site being accessed, 2) who initiated the request (typically a username or email address), 3) the action that triggered the request, and 4) the computer that originated the request. The site name comes from the Toopher API credentials. The username is provided by the implementer, as is the action. Terminal names are also provided by the implementer, but we suggest that the user names the terminal. A request coming from a meaningful, personally named terminal (like "downstairs PC") is easily differentiated from a request coming from an unknown or generically named terminal. 
 
-The latter issue we will fix by letting the user name their terminal, which will be tracked in a cookie. We find "My work laptop" more meaningful than "108.162.201.68" or "Chrome on Mac OS X", but the choice is yours.
+``` ruby
+def toopher_auth(user=nil)
+  toopher = ToopherAPI.new(ENV['TOOPHER_CONSUMER_KEY'], ENV['TOOPHER_CONSUMER_SECRET']) rescue nil
 
-The former we will fix by moving the timeout logic to client-side JavaScript where we will periodically poll the server for the request's status. Note: JavaScript polling is not the only way to solve this problem. For example, you could use something like [Socket.io](http://socket.io/) to effectively keep the socket open until the server responds; you could implement an authentication pending page that automatically forwards the user on after authentication; or you could create a callback that triggers the login. 
+  terminal_name = user.toopher_terminals.where(:cookie_value => cookies[:toopher]).first.terminal_name rescue nil
+  if terminal_name.nil?
+    return name_terminal
+  end
 
-With this, you will have a basic Toopher implementation working on your Rails site. In the next post we'll show how to convert the this minimum viable Toopher implementation into an easy-to-use, non-blocking user delight.
+  if not session[:toopher_auth_start]
+    begin
+      auth_status = toopher.authenticate(user.toopher_pairing_id, terminal_name, 'login', { terminal_name_extra: cookies[:toopher] })
+    rescue
+      return fail_login
+    end
+    session[:toopher_auth_start] = Time.now
+    session[:toopher_auth_id] = auth_status.id
+  else
+    auth_status = toopher.get_authentication_status(session[:toopher_auth_id])
+  end
+
+  if (Time.now - session[:toopher_auth_start] > 60)
+    return toopher_timeout
+  end
+
+  if !auth_status.pending
+    if auth_status.granted
+      return pass_login(user)
+    else
+      return toopher_deny
+    end
+  end
+
+  render :json => { :pairing_id => session[:toopher_pairing_id] }
+  return
+end
+```
+
+With this, you will have a basic Toopher implementation working on your Rails site. 
 
 Questions or comments? Let us know. We aim to please!
 
