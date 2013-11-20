@@ -7,7 +7,7 @@ display_title: Toopher on Rails - Augmenting the Ruby on Rails tutorial sample a
 ---
 {% include JB/setup %}
 
-Over the weekend I added Toopher to a sample application from the [Ruby on Rails Tutorial](http://railstutorial.org/) by [Michael Hartl](http://michaelhartl.com/) (specifically, the [sample app](https://github.com/mhartl/sample_app)). The application is a basic social microposting site with a simple authentication system (under the covers it uses `has_secure_password`). I hope the lean application is easy to understand--I tried to write clean, idiomatic Ruby without too many frills or tricks.
+Over the weekend I added Toopher to a sample application from the [Ruby on Rails Tutorial](http://railstutorial.org/) by [Michael Hartl](http://michaelhartl.com/) (specifically, the [sample app](https://github.com/railstutorial/sample_app_2nd_ed)). The application is a basic social microposting site with a simple authentication system (under the covers it uses `has_secure_password`). I hope the lean application is easy to understand--I tried to write clean, idiomatic Ruby without too many frills or tricks.
 
 You can see the code on [GitHub](https://github.com/smholloway/sample_app_2nd_ed_with_toopher/). See my [pull request](https://github.com/smholloway/sample_app_2nd_ed_with_toopher/pull/2/files), which added Toopher and made the changes necessary to deploy to Heroku. The main changes are in the `sessions_controller` (authenticating) and `users_controller` (pairing). To provide a better user experience we refactored several methods to return JSON and offload processing to JavaScript. The client-side JavaScript is in `toopher.js`. My apologies for the Rails assets clutter in the diff.
 
@@ -246,11 +246,23 @@ With this, you will have a basic Toopher implementation working on your Rails si
 
 ## Next steps
 
-This is a basic example. In a full-fledged implementation
-you would likely spruce up the UI. We also recommend providing a method to
-remove Toopher; this can be self-service or performed by an administrator who flips a bit in
-the database. Self-service options include a security question and
-answer or email reset.
+This is a basic example. In a full-fledged implementation you should spruce up the UI and match your site's design. 
+
+We also recommend providing a method to remove Toopher; this can be self-service or performed by an administrator who flips a bit in the database. Self-service options include a security question and answer or email reset.
+
+## Running the app locally
+
+Getting the sample app running locally is similar to starting any Rails project: clone the repo, install your gems, and migrate your database. One additional step is to configure Toopher. In this example, the Toopher client is instantiated using API credentials stored in the environment (`toopher = ToopherAPI.new(ENV['TOOPHER_CONSUMER_KEY'], ENV['TOOPHER_CONSUMER_SECRET'])`), so you need to set `TOOPHER_CONSUMER_KEY` and `TOOPHER_CONSUMER_SECRET`. 
+
+``` sh
+git clone git@github.com:smholloway/sample_app_2nd_ed_with_toopher.git
+cp config/database.yml.example config/database.yml
+bundle install
+bundle exec rake db:migrate
+export TOOPHER_CONSUMER_KEY=xxx
+export TOOPHER_CONSUMER_SECRET=xxx
+rails server
+```
 
 Questions or comments? Let us know. We aim to please!
 
