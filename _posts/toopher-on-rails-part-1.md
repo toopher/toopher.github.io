@@ -9,23 +9,34 @@ display_title: Toopher on Rails - Part 1
 
 Over the weekend I added Toopher to a sample application from the [Ruby on Rails Tutorial](http://railstutorial.org/) by [Michael Hartl](http://michaelhartl.com/) (specifically, the [sample app](https://github.com/mhartl/sample_app)). The application is a basic social microposting site with a simple authentication system (under the covers it uses `has_secure_password`). I hope the lean application is easy to understand--I tried to write clean, idiomatic Ruby without too many frills or tricks.
 
-You can see the code on [GitHub](https://github.com/smholloway/sample_app_2nd_ed_with_toopher/). The main changes are in the `sessions_controller` and `users_controller`. To provide a better user experience we refactored several methods to return JSON and offload processing to JavaScript. The client-side JavaScript is in `toopher.js`.
+You can see the code on [GitHub](https://github.com/smholloway/sample_app_2nd_ed_with_toopher/). See my [pull request](https://github.com/smholloway/sample_app_2nd_ed_with_toopher/pull/2/files), which added Toopher and made the changes necessary to deploy to Heroku. The main changes are in the `sessions_controller` and `users_controller`. To provide a better user experience we refactored several methods to return JSON and offload processing to JavaScript. The client-side JavaScript is in `toopher.js`. My apologies for the Rails assets clutter in the diff.
 
 The application is [running on Heroku](https://rails-sample-app-with-toopher.herokuapp.com/), but I suggest you visit the [Toopher Demo](https://demo.toopher.com/) if your goal is to see how Toopher works.
 
 # Highlights of the integration
+Here's a high level overview of the changes. Many of the changes to
+existing files are very small. I'll skip over any UI additions because
+your implenentation will likely be very different; for example, you
+likely have a loading spinner or library. 
 
-Let's walk through some of the changes made to integrate Toopher.
+## Changes to existing files
+* `Gemfile` -- add the Toopher gem
+* `app/controllers/sessions_controller` -- augment the existing authentication logic with Toopher for 2FA
+* `app/controllers/users_controller` -- logic for pairing and unpairing
+* `app/models/user.rb` -- add Toopher bits to the user
+* `app/views/sessions/new.html.erb` -- add a unique ID that we can reliably hook a JavaScript listener to
+* `app/views/users/edit.html.erb` -- add Toopher to the user edit page
+* `config/routes.rb` -- wire up the Toopher endpoints
 
-## Grab the Toopher API gem
-First things first. Add the [Toopher API gem](http://rubygems.org/gems/toopher_api) to your `Gemfile`:
+## New code
+* `app/assets/javascripts/toopher.js` -- client-side JavaScript to poll until a user responds to pairing and authentication requests
+* `app/controllers/toopher_terminals_controller` -- logic to create new Toopher terminals for a user
+* `app/models/toopher_terminal.rb` -- Toopher terminals represent unique devices with which users connect
+* `app/views/users/_toopher.html.erb` -- the Toopher configuration frontend
+* `db/migrate/2031118000000_add_toopher_to_users.rb` -- add Toopher bits to the user
+* `db/migrate/20131118000001_create_toopher_terminals.rb` -- create the ToopherTerminals table
 
-``` ruby
-gem 'toopher_api', '~> 1.0.5'
-```
-
-After intalling the gem (`bundle install`), you will have access to [Toopher's Ruby language
-library](https://github.com/toopher/toopher-ruby), which simplifies calls to the API.
+# More details about specific pieces
 
 ## Updates to the User model
 We will update the User model (`user.rb`) to include a `toopher_pairing_id` and a utility method to determine if Toopher is enabled for the user. Here's a highlight of the changes:
@@ -96,56 +107,57 @@ We implement pairing and removing Toopher as methods on the user, so we update o
 
 ``` ruby
 resources :users do
-  # ... removed for brevity ...
-
-  post :toopher_create_pairing
-  post :toopher_delete_pairing
+  member do
+    get :following, :followers
+    post :toopher_create_pairing, :toopher_delete_pairing
+  end
 end
 ```
 
 ... and the controller (`users_controller.rb`):
 
 ``` ruby
-  def toopher_create_pairing
-    @user = User.find(params[:user_id])
-    pairing_phrase = params[:pairing_phrase]
-    toopher = ToopherAPI.new(ENV['TOOPHER_CONSUMER_KEY'], ENV['TOOPHER_CONSUMER_SECRET']) rescue nil
+def toopher_create_pairing
+  @user = User.find(params[:id])
+  pairing_phrase = params[:pairing_phrase]
+  toopher = ToopherAPI.new(ENV['TOOPHER_CONSUMER_KEY'], ENV['TOOPHER_CONSUMER_SECRET']) rescue nil
 
-    if not session[:toopher_pairing_start]
-      begin
-        pairing = toopher.pair(pairing_phrase, @user.email)
-      rescue
-        return toopher_bad_pairing_phrase
-      end
-      session[:toopher_pairing_start] = Time.now
-      session[:toopher_pairing_id] = pairing.id
-    else
-      pairing = toopher.get_pairing_status(session[:toopher_pairing_id])
+  if not session[:toopher_pairing_start]
+    begin
+      pairing = toopher.pair(pairing_phrase, @user.email)
+    rescue => e
+      puts $!, $@
+      return toopher_bad_pairing_phrase
     end
-
-    if Time.now - session[:toopher_pairing_start] > 60
-      return pairing_timeout
-    end
-
-    if pairing and pairing.enabled
-      if @user.update_attribute(:toopher_pairing_id, session[:toopher_pairing_id])
-        sign_in @user
-        return toopher_pairing_enabled
-      end
-    end
-
-    render :json => {:pairing_id => session[:toopher_pairing_id]}
+    session[:toopher_pairing_start] = Time.now
+    session[:toopher_pairing_id] = pairing.id
+  else
+    pairing = toopher.get_pairing_status(session[:toopher_pairing_id])
   end
 
-  def toopher_delete_pairing
-    @user = User.find(params[:user_id])
-    if @user.update_attribute(:toopher_pairing_id, "")
+  if Time.now - session[:toopher_pairing_start] > 60
+    return pairing_timeout
+  end
+
+  if pairing and pairing.enabled
+    if @user.update_attribute(:toopher_pairing_id, session[:toopher_pairing_id])
       sign_in @user
-      return toopher_pairing_disabled
-    else
-      render 'edit'
+      return toopher_pairing_enabled
     end
   end
+
+  render :json => {:pairing_id => session[:toopher_pairing_id]}
+end
+
+def toopher_delete_pairing
+  @user = User.find(params[:id])
+  if @user.update_attribute(:toopher_pairing_id, "")
+    sign_in @user
+    toopher_pairing_disabled
+  else
+    toopher_pairing_disabled_failed
+  end
+end
 ```
 
 During pairing, we store details about the request in the session. The same endpoint is polled by client-side JavaScript until the user accepts the pairing or the pairing times out (no response for 60 seconds, in this case).
@@ -205,7 +217,8 @@ def toopher_auth(user=nil)
   if not session[:toopher_auth_start]
     begin
       auth_status = toopher.authenticate(user.toopher_pairing_id, terminal_name, 'login', { terminal_name_extra: cookies[:toopher] })
-    rescue
+    rescue => e
+      puts $!, $@
       return fail_login
     end
     session[:toopher_auth_start] = Time.now
