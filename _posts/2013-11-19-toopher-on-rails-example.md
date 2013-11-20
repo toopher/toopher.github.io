@@ -39,7 +39,7 @@ The "Toopher Two Step" is simple: it's pairing and authenticating.
 ## Updates to the User model
 We will update the User model (`user.rb`) to include a `toopher_pairing_id` and a utility method to determine if Toopher is enabled for the user. Here's a highlight of the changes:
 
-``` ruby
+```ruby
 class User < ActiveRecord::Base
   # ... removed for brevity ...
 
@@ -55,7 +55,7 @@ end
 
 The `toopher_pairing_id` can be added with a migration like this:
 
-``` ruby
+```ruby
 class AddToopherToUsers < ActiveRecord::Migration
   def change
     add_column :users, :toopher_pairing_id, :string
@@ -69,7 +69,7 @@ and conditionally authenticate login requests with Toopher.
 ## Adding Toopher to the UI
 In this example, we added Toopher to the bottom of the user settings page using a partial view template (`_toopher.html.erb`):
 
-``` rhtml
+```rhtml
 <h3>Toopher</h3>
 
 <% if current_user and current_user.toopher_enabled? %>
@@ -94,7 +94,7 @@ In this example, we added Toopher to the bottom of the user settings page using 
 
 This hooks into the user settings page (`edit.html.erb`):
 
-``` rhtml
+```rhtml
 <%= render 'toopher' %>
 ```
 
@@ -103,7 +103,7 @@ Whenever a user navigates to their settings, they will see the option to add or 
 ## The pairing methods 
 We implement pairing and removing Toopher as methods on the user, so we update our routes and our controller. First, the routes (`routes.rb`):
 
-``` ruby
+```ruby
 resources :users do
   member do
     get :following, :followers
@@ -114,7 +114,7 @@ end
 
 ... and the controller (`users_controller.rb`):
 
-``` ruby
+```ruby
 def toopher_create_pairing
   @user = User.find(params[:id])
   pairing_phrase = params[:pairing_phrase]
@@ -170,7 +170,7 @@ During pairing, we store details about the request in the session. The `toopher_
 ## Authentication changes
 Your standard login might look something like this:
 
-``` ruby
+```ruby
 class SessionsController < ApplicationController
   def create
     user = User.find_by_email(params[:session][:email].downcase)
@@ -186,7 +186,7 @@ end
 
 The basic Toopher logic hooks in after the `user.authenticate` call. Basically, if the first factor passes, move on to authenticating with the second factor, like this (`sessions_controller.rb`):
 
-``` ruby
+```ruby
 class SessionsController < ApplicationController
   def create
     user = User.find_by_email(params[:session][:email].downcase)
@@ -208,7 +208,7 @@ The `toopher_auth` method will initiate a Toopher authentication request if a re
 
 Currently, the Toopher mobile app shows the user four pieces of information: 1) the site being accessed, 2) who initiated the request (typically a username or email address), 3) the action that triggered the request, and 4) the computer that originated the request. The site name comes from the Toopher API credentials. The username is provided by the implementer, as is the action. Terminal names are also provided by the implementer, but we suggest that the user names the terminal. A request coming from a meaningful, personally named terminal (like "downstairs PC") is easily differentiated from a request coming from an unknown or generically named terminal. 
 
-``` ruby
+```ruby
 def toopher_auth(user=nil)
   begin
     toopher = ToopherAPI.new(ENV['TOOPHER_CONSUMER_KEY'], ENV['TOOPHER_CONSUMER_SECRET'])
@@ -263,7 +263,7 @@ We also recommend providing a method to remove Toopher; this can be self-service
 
 Getting the sample app running locally is similar to starting any Rails project: clone the repo, install your gems, and migrate your database. One additional step is to configure Toopher. In this example, the Toopher client is instantiated using API credentials stored in the environment (`toopher = ToopherAPI.new(ENV['TOOPHER_CONSUMER_KEY'], ENV['TOOPHER_CONSUMER_SECRET'])`), so you need to set `TOOPHER_CONSUMER_KEY` and `TOOPHER_CONSUMER_SECRET`. 
 
-``` sh
+```sh
 git clone git@github.com:smholloway/sample_app_2nd_ed_with_toopher.git
 cp config/database.yml.example config/database.yml
 bundle install
