@@ -118,7 +118,12 @@ end
 def toopher_create_pairing
   @user = User.find(params[:id])
   pairing_phrase = params[:pairing_phrase]
-  toopher = ToopherAPI.new(ENV['TOOPHER_CONSUMER_KEY'], ENV['TOOPHER_CONSUMER_SECRET']) rescue nil
+
+  begin
+    toopher = ToopherAPI.new(ENV['TOOPHER_CONSUMER_KEY'], ENV['TOOPHER_CONSUMER_SECRET'])
+  rescue
+    return toopher_setup_error
+  end
 
   if not session[:toopher_pairing_start]
     begin
@@ -205,7 +210,11 @@ Currently, the Toopher mobile app shows the user four pieces of information: 1) 
 
 ``` ruby
 def toopher_auth(user=nil)
-  toopher = ToopherAPI.new(ENV['TOOPHER_CONSUMER_KEY'], ENV['TOOPHER_CONSUMER_SECRET']) rescue nil
+  begin
+    toopher = ToopherAPI.new(ENV['TOOPHER_CONSUMER_KEY'], ENV['TOOPHER_CONSUMER_SECRET'])
+  rescue
+    return toopher_setup_error
+  end
 
   terminal_name = user.toopher_terminals.where(:cookie_value => cookies[:toopher]).first.terminal_name rescue nil
   if terminal_name.nil?
