@@ -3,40 +3,38 @@ layout: post
 category: 
 tags: []
 author: Seth
-display_title: Toopher on Rails - Part 1
+display_title: Toopher on Rails - Augmenting the Ruby on Rails tutorial sample app
 ---
 {% include JB/setup %}
 
 Over the weekend I added Toopher to a sample application from the [Ruby on Rails Tutorial](http://railstutorial.org/) by [Michael Hartl](http://michaelhartl.com/) (specifically, the [sample app](https://github.com/mhartl/sample_app)). The application is a basic social microposting site with a simple authentication system (under the covers it uses `has_secure_password`). I hope the lean application is easy to understand--I tried to write clean, idiomatic Ruby without too many frills or tricks.
 
-You can see the code on [GitHub](https://github.com/smholloway/sample_app_2nd_ed_with_toopher/). See my [pull request](https://github.com/smholloway/sample_app_2nd_ed_with_toopher/pull/2/files), which added Toopher and made the changes necessary to deploy to Heroku. The main changes are in the `sessions_controller` and `users_controller`. To provide a better user experience we refactored several methods to return JSON and offload processing to JavaScript. The client-side JavaScript is in `toopher.js`. My apologies for the Rails assets clutter in the diff.
+You can see the code on [GitHub](https://github.com/smholloway/sample_app_2nd_ed_with_toopher/). See my [pull request](https://github.com/smholloway/sample_app_2nd_ed_with_toopher/pull/2/files), which added Toopher and made the changes necessary to deploy to Heroku. The main changes are in the `sessions_controller` (authenticating) and `users_controller` (pairing). To provide a better user experience we refactored several methods to return JSON and offload processing to JavaScript. The client-side JavaScript is in `toopher.js`. My apologies for the Rails assets clutter in the diff.
 
-The application is [running on Heroku](https://rails-sample-app-with-toopher.herokuapp.com/), but I suggest you visit the [Toopher Demo](https://demo.toopher.com/) if your goal is to see how Toopher works.
+If the diff is too abstract, I also threw the [example application up on Heroku](https://rails-sample-app-with-toopher.herokuapp.com/). If your goal is simply to see how Toopher works, you'll be better served by the [Toopher Demo](https://demo.toopher.com/)--it is awesome!
 
 # Highlights of the integration
-Here's a high level overview of the changes. Many of the changes to
-existing files are very small. I'll skip over any UI additions because
-your implenentation will likely be very different; for example, you
-likely have a loading spinner or library. 
+Below is a high level overview of the changes. Many of the changes to existing files are very small, but I've tried to succinctly describe the rationale. I'll skip over any UI additions because your implenentation will likely be very different; for example, you likely have a loading spinner or library. If you're not sure why something changed, feel free to ask via comment here or on the GitHub repo.
 
 ## Changes to existing files
 * `Gemfile` -- add the Toopher gem
+* `app/models/user.rb` -- add Toopher bits to the user
+* `config/routes.rb` -- wire up the Toopher endpoints
+* `app/views/sessions/new.html.erb` -- add a unique ID that we can reliably hook a JavaScript listener to
 * `app/controllers/sessions_controller` -- augment the existing authentication logic with Toopher for 2FA
 * `app/controllers/users_controller` -- logic for pairing and unpairing
-* `app/models/user.rb` -- add Toopher bits to the user
-* `app/views/sessions/new.html.erb` -- add a unique ID that we can reliably hook a JavaScript listener to
 * `app/views/users/edit.html.erb` -- add Toopher to the user edit page
-* `config/routes.rb` -- wire up the Toopher endpoints
 
 ## New code
-* `app/assets/javascripts/toopher.js` -- client-side JavaScript to poll until a user responds to pairing and authentication requests
-* `app/controllers/toopher_terminals_controller` -- logic to create new Toopher terminals for a user
 * `app/models/toopher_terminal.rb` -- Toopher terminals represent unique devices with which users connect
+* `app/controllers/toopher_terminals_controller` -- logic to create new Toopher terminals for a user
+* `app/assets/javascripts/toopher.js` -- client-side JavaScript to poll until a user responds to pairing and authentication requests
 * `app/views/users/_toopher.html.erb` -- the Toopher configuration frontend
 * `db/migrate/2031118000000_add_toopher_to_users.rb` -- add Toopher bits to the user
 * `db/migrate/20131118000001_create_toopher_terminals.rb` -- create the ToopherTerminals table
 
 # More details about specific pieces
+The "Toopher Two Step" is simple: it's pairing and authenticating.
 
 ## Updates to the User model
 We will update the User model (`user.rb`) to include a `toopher_pairing_id` and a utility method to determine if Toopher is enabled for the user. Here's a highlight of the changes:
@@ -69,7 +67,7 @@ With these changes in place, we can add in logic to pair/remove Toopher
 and conditionally authenticate login requests with Toopher.
 
 ## Adding Toopher to the UI
-In this example, we will add Toopher to the bottom of the user settings page. We'll start by creating a partial view template (`_toopher.html.erb`):
+In this example, we added Toopher to the bottom of the user settings page using a partial view template (`_toopher.html.erb`):
 
 ``` rhtml
 <h3>Toopher</h3>
@@ -100,7 +98,7 @@ This hooks into the user settings page (`edit.html.erb`):
 <%= render 'toopher' %>
 ```
 
-Now, whenever a user navigates to their settings, they will see the option to add or remove Toopher from their account. As you see in the Toopher partial above, to add Toopher the app will `POST` to `toopher_create_pairing` with a pairing phrase; to remove Toopher the app will `POST` to `toopher_delete_pairing`. Let's look at the pairing methods.
+Whenever a user navigates to their settings, they will see the option to add or remove Toopher from their account. As you see in the Toopher partial above, to add Toopher the app will `POST` to `toopher_create_pairing` with a pairing phrase; to remove Toopher the app will `POST` to `toopher_delete_pairing`. Let's look at the pairing methods.
 
 ## The pairing methods 
 We implement pairing and removing Toopher as methods on the user, so we update our routes and our controller. First, the routes (`routes.rb`):
@@ -160,9 +158,9 @@ def toopher_delete_pairing
 end
 ```
 
-During pairing, we store details about the request in the session. The same endpoint is polled by client-side JavaScript until the user accepts the pairing or the pairing times out (no response for 60 seconds, in this case).
-
 With this, users can add and remove Toopher. 
+
+During pairing, we store details about the request in the session. The `toopher_create_pairing` endpoint is polled by client-side JavaScript until the user accepts the pairing or the pairing times out (no response for 60 seconds, in this case). Note that we have a 90 second timeout in JavaScript in case the server doesn't work as expected.
 
 ## Authentication changes
 Your standard login might look something like this:
@@ -181,7 +179,7 @@ class SessionsController < ApplicationController
 end
 ```
 
-The basic Toopher logic hooks in after the `user.authenticate` call, like this:
+The basic Toopher logic hooks in after the `user.authenticate` call. Basically, if the first factor passes, move on to authenticating with the second factor, like this (`sessions_controller.rb`):
 
 ``` ruby
 class SessionsController < ApplicationController
@@ -249,7 +247,7 @@ With this, you will have a basic Toopher implementation working on your Rails si
 ## Next steps
 
 This is a basic example. In a full-fledged implementation
-you would likely spruce up the UI. We recommend providing a method to
+you would likely spruce up the UI. We also recommend providing a method to
 remove Toopher; this can be self-service or performed by an administrator who flips a bit in
 the database. Self-service options include a security question and
 answer or email reset.
