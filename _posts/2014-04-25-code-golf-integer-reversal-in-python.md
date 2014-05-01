@@ -16,11 +16,11 @@ integer bit reversal.  Our approaches can roughly be classified as
 *bit manipulation*, *reduce*, *recursive lambdas*, and *string reversal*. 
 It unfolded something like this:
 
-It started with us simply trying to get a correct solution. A couple
-*bit manipulation* approaches came out: shifting with magical constants 
-and shift-and-mask.
+It started with us simply trying to get a correct solution with Google
+and our own ingenuity. A couple *bit manipulation* approaches came out: 
+shifting with magical constants and shift-and-mask.
 
-The less-than-obvious bit twiddling solution:
+The [less-than-obvious bit twiddling solution from StackOverflow](http://stackoverflow.com/a/746203/553403):
 
     def reverse_bits(x):
       x = (((x & 0xaaaaaaaa) >> 1) | ((x & 0x55555555) << 1))
@@ -29,7 +29,8 @@ The less-than-obvious bit twiddling solution:
       x = (((x & 0xff00ff00) >> 8 ) | ((x & 0x00ff00ff) << 8))
       return((x >> 16) | (x << 16))
 
-And the more readable shift-and-mask:
+We ultimately decided this solution was cheating since we could not rederive it easily.
+So, we dove into writing our own and came up with the more readable shift-and-mask:
 
     def reverse(input_, width=32):
       output = 0
