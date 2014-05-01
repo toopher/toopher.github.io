@@ -12,10 +12,13 @@ thought I had done bit operations more often in interviews than in years of
 real coding. This led to a discussion about the merits of bit
 operations, ultimately centering on how to reverse the bits in a 32b
 integer. From there, we geeked out on how to write the shortest 32b
-integer bit reversal. It unfolded something like this:
+integer bit reversal.  Our approaches can roughly be classified as 
+*bit manipulation*, *reduce*, *recursive lambdas*, and *string reversal*. 
+It unfolded something like this:
 
 It started with us simply trying to get a correct solution. A couple
-approaches came out: shifting with magical constants and shift-and-mask.
+*bit manipulation* approaches came out: shifting with magical constants 
+and shift-and-mask.
 
 The less-than-obvious bit twiddling solution:
 
@@ -36,7 +39,7 @@ And the more readable shift-and-mask:
         output = output | (bit << i - 1)
       return output
     
-Then we started to get terse with this 116 character `reduce` solution:
+Then we started to get terse with this 116 character *reduce* solution:
 
     # We start to get tricky
     def bitrev(n):
@@ -95,12 +98,12 @@ Tied at 40 characters we broke the tie with disassembling. The recursive
 lambda came out larger than the string reversal and it was slower.
 It seems standard library functions are robust.
 
-Much later, an elegant 37 character solution surfaced:
+Much later, an elegant 37 character string reversal solution surfaced:
 
     b=lambda n:int(bin(2**32+n)[:2:-1],2)
 
-This approach proved faster than the string reversal, although the
-disassembly was a hint longer.
+This approach proved faster than the string reversal using
+`format`, although the disassembly was a hint longer.
 
 We haven't found a shorter approach. Is 37 character the lower limit?
 Perhaps, although we think the theoretical winner would import a minified 
@@ -114,7 +117,7 @@ helpfully converts `int`s to `bignum`s under the cover, so you don't
 easily overflow, which is really nice until you specifically need a 4 byte
 integer).
 
-This ended up being a fun learning experience. It was fascinating to see
+This ended up being a fun learning experience.  It was fascinating to see
 how we all approached the problem and how we fed off one another's
 optimizations. Long live integer bit reversals!
 
@@ -154,7 +157,7 @@ To test, try these simple testcases:
              38 RETURN_VALUE
 
 
-    # String reversal
+    # String reversal with format
     1         0 LOAD_GLOBAL              0 (int)
               3 LOAD_GLOBAL              1 (format)
               6 LOAD_FAST                0 (n)
@@ -169,7 +172,7 @@ To test, try these simple testcases:
              31 CALL_FUNCTION            2
              34 RETURN_VALUE
 
-    # Bit manipulation
+    # String reversal with bin
     1         0 LOAD_GLOBAL              0 (int)
               3 LOAD_GLOBAL              1 (bin)
               6 LOAD_CONST               4 (4294967296)
@@ -191,10 +194,10 @@ To test, try these simple testcases:
     timeit b(b(1))
     100000 loops, best of 3: 11.7 us per loop
 
-    # String reversal
+    # String reversal with format
     timeit b(b(1))
     100000 loops, best of 3: 2.95 us per loop
     
-    # Bit manipulation
+    # String reversal with bin
     timeit b(b(1))
     100000 loops, best of 3: 2.86 µs per loop
