@@ -24,7 +24,7 @@ with far less hassle. The Toopher app provides a clean, unified user
 experience where all accounts are collected in one place.
 
 Toopher is secure from the ground up, built using proven technologies
-such as TLS/SSL OAuth 1.0a, and RFC 6238 (TOTP). These processes ensure
+such as TLS/SSL, OAuth 1.0a, and RFC 6238 (TOTP). These processes ensure
 that data remains confidential on-the-wire and prevent standard attacks
 that rely on replaying requests or tampering with data.
 
