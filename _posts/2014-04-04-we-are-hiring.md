@@ -6,13 +6,10 @@ author: TR
 ---
 {% include JB/setup %}
 
-We are looking to [hire](https://www.toopher.com/hiring/) several [software
-engineers](https://www.toopher.com/job/software-engineer/) and
-[interns/co-ops](https://www.toopher.com/job/software-engineering-intern/).
+We are looking to [hire](https://www.toopher.com/careers) several software
+engineers and interns/co-ops.
 
-You're awesome; we're awesome; let's be awesome together. And [we like to have fun](https://www.toopher.com/threepher/).
-
-![April Fools](https://www.toopher.com/wp-content/uploads/2014/04/collage-o-talents.jpeg)
+You're awesome; we're awesome; let's be awesome together. And we like to have fun.
 
 ---
 
