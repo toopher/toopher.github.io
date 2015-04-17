@@ -1,15 +1,13 @@
 # Toopher Dev Blog
 
-The [Toopher Dev Blog](https://devblog.toopher.com/).
+The (former) Toopher Dev Blog.
 
-![Toopher logo](/assets/images/toopher-logo.png)
+**April 1, 2015**
 
-## Based on Jekyll-Bootstrap
-
-For all usage and documentation please see: [Jekyll Bootstrap](http://jekyllbootstrap.com)
+Salesforce acquired Toopher. Please find us as a part of Salesforce
+Identity.
 
 ## License 
 
-Feel free to use our flavor of Jekyll Bootstrap, but please don't copy
-the posts. Posts are copyright Toopher and cannot be republished without written
+Posts are copyright Toopher (now Salesforce) and cannot be republished without written
 consent.
