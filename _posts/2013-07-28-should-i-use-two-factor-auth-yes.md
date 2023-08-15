@@ -12,5 +12,5 @@ display_title: Should You Use Two Factor Authentication? Yes!
 
 ![Yes, you should use Toopher](http://i.imgur.com/EftY63v.png)
 
-Just having some fun :) Inspired by [canrailsscale](http://canrailsscale.com). 
+Just having some fun :) Inspired by canrailsscale. 
 
