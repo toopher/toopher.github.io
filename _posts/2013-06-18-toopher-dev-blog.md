@@ -5,7 +5,6 @@ tags: []
 author: Seth
 display_title: Announcing the Toopher Dev Blog!
 ---
-{% include JB/setup %}
 
 Toopher is changing the face of security by making two-factor authentication usable. Our initial solution uses your cell phone's location to automate requests from known-safe locations.
 
