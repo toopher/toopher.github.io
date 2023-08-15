@@ -4,7 +4,6 @@ category:
 tags: []
 author: Seth
 ---
-{% include JB/setup %}
 
 Last week [Toopher made it onto Reddit](http://www.reddit.com/r/netsec/comments/1kxn5f/toopher_a_simple_phonebased_twofactor/) organically, which was really cool! Below are responses to some of the issues raised. If you've got another question, please ask!
 

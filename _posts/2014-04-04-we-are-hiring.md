@@ -4,7 +4,6 @@ category:
 tags: []
 author: TR
 ---
-{% include JB/setup %}
 
 We are looking to [hire](https://www.toopher.com/careers) several software
 engineers and interns/co-ops.

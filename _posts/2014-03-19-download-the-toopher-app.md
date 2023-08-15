@@ -4,7 +4,6 @@ category:
 tags: []
 author: Seth
 ---
-{% include JB/setup %}
 
 You can download [Toopher for Android](https://play.google.com/store/apps/details?id=com.toopher.android) or [Toopher for
 iOS](https://itunes.apple.com/us/app/toopher/id562592093?mt=8). 

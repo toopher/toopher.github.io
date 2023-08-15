@@ -4,7 +4,6 @@ category:
 tags: []
 author: Seth
 ---
-{% include JB/setup %}
 
 ![http://www.likecool.com/Style/Hat/New%20Era%20x%20Star%20Wars%20Cap%20Collection/New-Era-x-Star-Wars-Cap-Collection.jpg](http://i.imgur.com/BhBFWGX.jpg)
 

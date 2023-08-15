@@ -5,7 +5,6 @@ tags: []
 author: Seth
 display_title: Python Code Golf - Reverse a 32b Integer
 ---
-{% include JB/setup %}
 
 We were talking recently and I brought up bit operations. I said I
 thought I had done bit operations more often in interviews than in years of

@@ -4,7 +4,6 @@ category:
 tags: []
 author: Seth
 ---
-{% include JB/setup %}
 
 We recently mentioned `terminal_name_extra` in our post about [testing your Toopher implementation](https://devblog.toopher.com/2013/08/21/testing-your-toopher-implementation/) and in our quick advice about [naming terminals](https://devblog.toopher.com/2013/08/25/naming-terminals/). In this post we'll provide a little more information as well as code snippets for each language.
 

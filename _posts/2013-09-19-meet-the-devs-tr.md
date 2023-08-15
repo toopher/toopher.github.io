@@ -5,7 +5,6 @@ tags: []
 author: Seth
 display_title: Meet the Devs - TR Darr
 ---
-{% include JB/setup %}
 
 Thomas "TR" Darr is man of many hats at Toopher, working client-side on our mobile
 apps and server-side on our API. He's a recent graduate from The

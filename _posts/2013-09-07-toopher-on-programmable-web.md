@@ -4,7 +4,6 @@ category:
 tags: []
 author: Seth
 ---
-{% include JB/setup %}
 
 We're always excited to see Toopher love spread, so I perked up when I recently saw that the [Toopher API had been published on Programmable Web](http://www.programmableweb.com/api/toopher).  (If you've never heard of it, Programmable Web is a directory service for APIs, currently indexing over 9000 APIs.)
 

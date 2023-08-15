@@ -4,7 +4,6 @@ category:
 tags: []
 author: Seth
 ---
-{% include JB/setup %}
 
 Travis CI is an amazing service for the open source community! CI, Continuous Integration, runs your tests on every commit, notifying
 the team of any errors. This is a great practice that helps elevate the

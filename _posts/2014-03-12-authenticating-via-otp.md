@@ -5,7 +5,6 @@ tags: []
 title: Authenticating via OTP
 author: Seth
 ---
-{% include JB/setup %}
 
 Toopher provides invisible authentication, but we understand the need
 for a backup. When users cannot authenticate in the standard way, we 

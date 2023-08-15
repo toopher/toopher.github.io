@@ -5,7 +5,6 @@ tags: []
 author: Seth
 display_title: Technical Terms Defined, Part I
 ---
-{% include JB/setup %}
 
 ![Most security books read like dusty, arcane tomes](http://i.imgur.com/lboC8so.jpg)
 

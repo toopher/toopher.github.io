@@ -4,7 +4,6 @@ category:
 tags: []
 author: Seth
 ---
-{% include JB/setup %}
 
 So, you've implemented Toopher and you're about to take over the world.  Not so fast! Below is a checklist of scenarios to test before you unleash the beast.
 

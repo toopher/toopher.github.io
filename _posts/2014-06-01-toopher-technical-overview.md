@@ -5,7 +5,6 @@ tags: []
 author: Seth
 display_title: Toopher Technical Description
 ---
-{% include JB/setup %}
 
 If you're reading this, you're probably a techincal person. Hopefully,
 you've read about [Toopher](https://www.toopher.com/) and understand the

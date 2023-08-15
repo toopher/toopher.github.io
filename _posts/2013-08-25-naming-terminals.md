@@ -4,7 +4,6 @@ category:
 tags: []
 author: Evan
 ---
-{% include JB/setup %}
 
 We are commonly asked about how to track terminals. Implementers need
 to provide a unique string as the `$terminalName` argument for each

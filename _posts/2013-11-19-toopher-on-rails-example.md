@@ -5,7 +5,6 @@ tags: []
 author: Seth
 display_title: Toopher on Rails - Augmenting the Ruby on Rails tutorial sample app
 ---
-{% include JB/setup %}
 
 Over the weekend I added Toopher to a sample application from the [Ruby on Rails Tutorial](http://railstutorial.org/) by [Michael Hartl](http://michaelhartl.com/) (specifically, the [sample app](https://github.com/railstutorial/sample_app_2nd_ed)). The application is a basic social microposting site with a simple authentication system (under the covers it uses `has_secure_password`). I hope the lean application is easy to understand--I tried to write clean, idiomatic Ruby without too many frills or tricks.
 
